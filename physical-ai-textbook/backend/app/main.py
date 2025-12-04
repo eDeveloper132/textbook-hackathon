@@ -90,8 +90,10 @@ class PersonalizeRequest(BaseModel):
 
 
 class TranslateRequest(BaseModel):
-    chapter_slug: str
-    content: str
+    text: str = ""
+    content: str = ""
+    chapter_slug: str = "selected-text"
+    target_language: str = "urdu"
 
 
 # Helper to get current user
@@ -238,10 +240,23 @@ async def personalize_content(request: PersonalizeRequest, user=Depends(get_curr
 # Translation Endpoint
 @app.post("/api/translate")
 async def translate_to_urdu(request: TranslateRequest):
-    """Translate chapter to Urdu"""
+    """Translate text to Urdu"""
     try:
-        result = await get_urdu_translation(request.chapter_slug, request.content)
-        return result
+        # Support both 'text' and 'content' fields
+        text_to_translate = request.text or request.content
+        
+        if not text_to_translate:
+            raise HTTPException(status_code=400, detail="No text provided for translation")
+        
+        result = await get_urdu_translation(request.chapter_slug, text_to_translate)
+        
+        # Return in format frontend expects
+        return {
+            "translation": result.get("urdu_content", ""),
+            "translated_text": result.get("urdu_content", ""),
+            "urdu_content": result.get("urdu_content", ""),
+            "original": text_to_translate
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

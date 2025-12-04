@@ -16,22 +16,28 @@ class TranslationEngine:
     async def translate_to_urdu(self, content: str, chapter_slug: str) -> str:
         """Translate content to Urdu with technical term preservation"""
         
-        # Check cache first
-        cached = await fetch_one(
-            "SELECT urdu_content FROM urdu_cache WHERE chapter_slug = $1",
-            chapter_slug
-        )
+        # For short text selections, skip caching and use simpler prompt
+        is_short_text = len(content) < 500
         
-        if cached:
-            return cached["urdu_content"]
+        if not is_short_text:
+            # Check cache first for longer content
+            cached = await fetch_one(
+                "SELECT urdu_content FROM urdu_cache WHERE chapter_slug = $1",
+                chapter_slug
+            )
+            
+            if cached:
+                return cached["urdu_content"]
         
-        # Translate using GPT-4o-mini
-        response = await self.openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": """You are an expert technical translator specializing in robotics and AI content.
+        # Use shorter prompt for short text
+        if is_short_text:
+            system_prompt = """Translate to Urdu. Keep technical terms with transliteration in brackets.
+Example: Robot → روبوٹ (Robot), AI → مصنوعی ذہانت (AI)
+Be concise and accurate."""
+            user_prompt = content
+            max_tokens = 500
+        else:
+            system_prompt = """You are an expert technical translator specializing in robotics and AI content.
 Translate the following content to Urdu while:
 
 1. PRESERVING exactly as-is:
@@ -57,24 +63,29 @@ Translate the following content to Urdu while:
    - Action → ایکشن
 
 Use clear, modern Urdu suitable for technical education."""
-                },
-                {
-                    "role": "user",
-                    "content": f"Translate this robotics textbook content to Urdu:\n\n{content}"
-                }
+            user_prompt = f"Translate this robotics textbook content to Urdu:\n\n{content}"
+            max_tokens = 4000
+        
+        # Translate using GPT-4o-mini
+        response = await self.openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            max_tokens=4000
+            max_tokens=max_tokens
         )
         
         urdu_content = response.choices[0].message.content
         
-        # Cache the translation
-        await execute(
-            "INSERT INTO urdu_cache (chapter_slug, urdu_content) VALUES ($1, $2) "
-            "ON CONFLICT (chapter_slug) DO UPDATE SET urdu_content = $2",
-            chapter_slug, urdu_content
-        )
+        # Cache only longer translations
+        if not is_short_text:
+            await execute(
+                "INSERT INTO urdu_cache (chapter_slug, urdu_content) VALUES ($1, $2) "
+                "ON CONFLICT (chapter_slug) DO UPDATE SET urdu_content = $2",
+                chapter_slug, urdu_content
+            )
         
         return urdu_content
 
