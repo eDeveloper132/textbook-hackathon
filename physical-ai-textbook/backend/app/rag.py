@@ -46,7 +46,7 @@ class RAGEngine:
         )
         return response.data[0].embedding
     
-    async def search_vectors(self, query: str, top_k: int = 5) -> List[Dict]:
+    async def search_vectors(self, query: str, top_k: int = 3) -> List[Dict]:
         """Search Qdrant for similar chunks"""
         try:
             query_vector = await self.embed_query(query)
@@ -57,7 +57,7 @@ class RAGEngine:
             )
             return [
                 {
-                    "text": hit.payload.get("text", ""),
+                    "text": hit.payload.get("text", "")[:500],  # Limit chunk size
                     "chapter": hit.payload.get("chapter", "Unknown"),
                     "score": hit.score
                 }
@@ -67,47 +67,41 @@ class RAGEngine:
             return []
     
     def build_prompt(self, question: str, context_chunks: List[Dict]) -> str:
-        """Build prompt with retrieved context"""
+        """Build concise prompt with retrieved context"""
         if context_chunks:
-            context = "\n\n".join([
-                f"[{c.get('chapter', 'Unknown')}]: {c.get('text', '')}" 
+            context = "\n".join([
+                f"[{c.get('chapter', '')}]: {c.get('text', '')}" 
                 for c in context_chunks
             ])
-            return f"""You are a helpful teaching assistant for a Physical AI and Robotics course.
-Answer the student's question based on the following textbook content.
-If the answer isn't in the context, say so and provide general guidance.
+            return f"""You are a robotics tutor. Answer concisely in 2-3 sentences.
 
-TEXTBOOK CONTEXT:
+Context:
 {context}
 
-STUDENT QUESTION: {question}
-
-Provide a clear, educational answer with examples where helpful."""
+Q: {question}
+A:"""
         else:
-            return f"""You are a helpful teaching assistant for a Physical AI and Robotics course.
-Answer this question about ROS2, Gazebo, Isaac Sim, or VLA models:
+            return f"""You are a robotics tutor. Answer concisely in 2-3 sentences about ROS2, Gazebo, Isaac Sim, or VLA.
 
-QUESTION: {question}
-
-Provide a clear, educational answer with examples where helpful."""
+Q: {question}
+A:"""
 
     async def generate_answer(self, prompt: str) -> str:
-        """Generate answer using GPT-4o-mini"""
+        """Generate answer using GPT-4o-mini with token limits"""
         response = await self.openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a robotics education assistant."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=1000
+            temperature=0.5,
+            max_tokens=200  # Reduced from 1000
         )
         return response.choices[0].message.content
     
     async def ask(self, question: str) -> Dict[str, Any]:
         """Full RAG pipeline: embed → search → generate"""
-        # Search for relevant chunks
-        chunks = await self.search_vectors(question, top_k=5)
+        # Search for relevant chunks (reduced to 3)
+        chunks = await self.search_vectors(question, top_k=3)
         
         # Build prompt with context
         prompt = self.build_prompt(question, chunks)
@@ -128,14 +122,14 @@ Provide a clear, educational answer with examples where helpful."""
     
     async def ask_selection(self, question: str, selection: str) -> Dict[str, Any]:
         """Answer question about selected text (no RAG)"""
-        prompt = f"""The student has selected the following text from the textbook:
+        # Limit selection to 500 chars
+        selection = selection[:500]
+        prompt = f"""Explain this text concisely in 2-3 sentences:
 
-SELECTED TEXT:
-{selection}
+Text: {selection}
 
-STUDENT QUESTION: {question}
-
-Explain this text and answer the student's question clearly."""
+Q: {question}
+A:"""
 
         answer = await self.generate_answer(prompt)
         return {"answer": answer}
