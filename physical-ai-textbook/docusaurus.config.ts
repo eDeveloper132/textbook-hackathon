@@ -8,7 +8,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://yourusername.github.io',
-  baseUrl: '/physical-ai-textbook/',
+  baseUrl: '/textbook-hackathon/',
 
   organizationName: 'yourusername',
   projectName: 'physical-ai-textbook',
