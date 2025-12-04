@@ -15,29 +15,45 @@ export default function FeatureToolbar() {
   const [quizResult, setQuizResult] = useState<{ score: number; level: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Default quiz questions
+  const defaultQuestions: QuizQuestion[] = [
+    { id: 1, question: "What does ROS2 stand for?", options: ["Robot Operating System 2", "Remote Operating System", "Robotic OS 2", "Real-time OS"], correct: 0 },
+    { id: 2, question: "Which simulator is developed by NVIDIA?", options: ["Gazebo", "Isaac Sim", "Webots", "CoppeliaSim"], correct: 1 },
+    { id: 3, question: "What is a VLA model?", options: ["Video Learning Algorithm", "Vision-Language-Action model", "Virtual Learning Agent", "Visual Language AI"], correct: 1 },
+    { id: 4, question: "What communication pattern does ROS2 use?", options: ["HTTP/REST", "Publish/Subscribe", "FTP", "WebSocket only"], correct: 1 },
+    { id: 5, question: "What is Gazebo used for?", options: ["Code editing", "Robot simulation", "Database management", "Web hosting"], correct: 1 },
+  ];
+
   // Load quiz questions
   const loadQuiz = async () => {
     setLoading(true);
+    setQuizResult(null);
+    setQuizAnswers({});
+    
     try {
       const res = await fetch(`${getBackendUrl()}/api/quiz/questions`);
       if (res.ok) {
         const data = await res.json();
-        setQuizQuestions(data.questions || []);
-        setShowQuiz(true);
-        setQuizResult(null);
-        setQuizAnswers({});
+        // Validate response has proper structure
+        if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+          const validQuestions = data.questions.filter(
+            (q: any) => q && q.id && q.question && Array.isArray(q.options) && q.options.length > 0
+          );
+          if (validQuestions.length > 0) {
+            setQuizQuestions(validQuestions);
+            setShowQuiz(true);
+            setLoading(false);
+            return;
+          }
+        }
       }
     } catch (e) {
-      // Use demo questions if backend unavailable
-      setQuizQuestions([
-        { id: 1, question: "What does ROS2 stand for?", options: ["Robot Operating System 2", "Remote Operating System", "Robotic OS 2", "Real-time OS"], correct: 0 },
-        { id: 2, question: "Which simulator is developed by NVIDIA?", options: ["Gazebo", "Isaac Sim", "Webots", "CoppeliaSim"], correct: 1 },
-        { id: 3, question: "What is a VLA model?", options: ["Video Learning Algorithm", "Vision-Language-Action model", "Virtual Learning Agent", "Visual Language AI"], correct: 1 },
-      ]);
-      setShowQuiz(true);
-      setQuizResult(null);
-      setQuizAnswers({});
+      console.log('Using default quiz questions');
     }
+    
+    // Fallback to default questions
+    setQuizQuestions(defaultQuestions);
+    setShowQuiz(true);
     setLoading(false);
   };
 
@@ -115,7 +131,7 @@ export default function FeatureToolbar() {
                   <div key={q.id} className="quiz-question">
                     <p><strong>{idx + 1}. {q.question}</strong></p>
                     <div className="quiz-options">
-                      {q.options.map((opt, optIdx) => (
+                      {Array.isArray(q.options) && q.options.map((opt, optIdx) => (
                         <label key={optIdx} className="quiz-option">
                           <input
                             type="radio"
