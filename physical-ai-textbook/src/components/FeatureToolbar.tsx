@@ -19,6 +19,10 @@ export default function FeatureToolbar() {
   const [userLevel, setUserLevel] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const [showUrduModal, setShowUrduModal] = useState(false);
+  const [urduTranslation, setUrduTranslation] = useState<string | null>(null);
+  const [selectedText, setSelectedText] = useState<string>('');
+
   // Check login status and user level on mount
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -26,6 +30,71 @@ export default function FeatureToolbar() {
     setIsLoggedIn(!!token);
     setUserLevel(level);
   }, []);
+
+  // Handle Urdu translation
+  const handleUrduTranslate = async () => {
+    const selection = window.getSelection()?.toString().trim();
+    
+    if (!selection || selection.length === 0) {
+      // No text selected - show modal with instructions or translate page title
+      setShowUrduModal(true);
+      setSelectedText('');
+      setUrduTranslation(null);
+      return;
+    }
+    
+    setSelectedText(selection);
+    setShowUrduModal(true);
+    setLoading(true);
+    
+    try {
+      const res = await fetch(`${getBackendUrl()}/api/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: selection, target_language: 'urdu' }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUrduTranslation(data.translation || data.translated_text);
+      } else {
+        // Fallback: show common translations
+        setUrduTranslation(getLocalUrduTranslation(selection));
+      }
+    } catch {
+      setUrduTranslation(getLocalUrduTranslation(selection));
+    }
+    setLoading(false);
+  };
+
+  // Local Urdu translations for common terms
+  const getLocalUrduTranslation = (text: string): string => {
+    const commonTerms: Record<string, string> = {
+      'robot': 'روبوٹ',
+      'artificial intelligence': 'مصنوعی ذہانت',
+      'machine learning': 'مشین لرننگ',
+      'simulation': 'نقالی / سمیولیشن',
+      'sensor': 'سینسر / حساس آلہ',
+      'motor': 'موٹر',
+      'programming': 'پروگرامنگ',
+      'code': 'کوڈ',
+      'introduction': 'تعارف',
+      'chapter': 'باب',
+      'physical ai': 'فزیکل اے آئی',
+      'ros': 'آر او ایس',
+      'gazebo': 'گزیبو',
+      'isaac sim': 'آئزک سم',
+    };
+    
+    const lowerText = text.toLowerCase();
+    for (const [eng, urdu] of Object.entries(commonTerms)) {
+      if (lowerText.includes(eng)) {
+        return `${text}\n\n🇵🇰 اردو ترجمہ:\n${urdu}\n\n(Note: For full translation, please ensure backend is running)`;
+      }
+    }
+    
+    return `Selected: "${text}"\n\n🇵🇰 اردو ترجمہ:\nبرائے مہربانی بیک اینڈ سرور چلائیں مکمل ترجمے کے لیے۔\n\n(Translation service requires backend connection)`;
+  };
 
   // Default quiz questions
   const defaultQuestions: QuizQuestion[] = [
@@ -150,9 +219,9 @@ export default function FeatureToolbar() {
         )}
         {FEATURES.URDU_TRANSLATION && (
           <button 
-            onClick={() => alert('Select text on the page, then use the chatbot to translate!')} 
+            onClick={handleUrduTranslate}
             className="toolbar-btn urdu-btn"
-            title="Urdu Translation"
+            title="Urdu Translation - Select text first!"
           >
             🇵🇰 اردو
           </button>
@@ -186,6 +255,46 @@ export default function FeatureToolbar() {
               </div>
             )}
             <button className="close-quiz" onClick={() => setShowPersonalize(false)}>×</button>
+          </div>
+        </div>
+      )}
+
+      {/* Urdu Translation Modal */}
+      {showUrduModal && (
+        <div className="quiz-modal-overlay" onClick={() => setShowUrduModal(false)}>
+          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
+            <h2>🇵🇰 اردو ترجمہ (Urdu Translation)</h2>
+            {!selectedText ? (
+              <div className="urdu-instructions">
+                <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
+                  <strong>How to use:</strong>
+                </p>
+                <ol style={{ textAlign: 'left', lineHeight: 1.8 }}>
+                  <li>Select any text on the page with your mouse</li>
+                  <li>Click the 🇵🇰 اردو button again</li>
+                  <li>See the Urdu translation!</li>
+                </ol>
+                <p style={{ marginTop: '1rem', color: '#666' }}>
+                  💡 Tip: You can also use the chatbot and type "translate to Urdu: [your text]"
+                </p>
+              </div>
+            ) : loading ? (
+              <p>⏳ ترجمہ ہو رہا ہے... (Translating...)</p>
+            ) : (
+              <div className="urdu-translation-result">
+                <div style={{ marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
+                  <strong>English:</strong>
+                  <p style={{ marginTop: '0.5rem' }}>{selectedText}</p>
+                </div>
+                <div style={{ padding: '1rem', background: '#e8f5e9', borderRadius: '8px', direction: 'rtl' }}>
+                  <strong>:اردو</strong>
+                  <p style={{ marginTop: '0.5rem', fontSize: '1.2rem', whiteSpace: 'pre-wrap' }}>
+                    {urduTranslation}
+                  </p>
+                </div>
+              </div>
+            )}
+            <button className="close-quiz" onClick={() => setShowUrduModal(false)}>×</button>
           </div>
         </div>
       )}
