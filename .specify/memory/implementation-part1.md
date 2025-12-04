@@ -58,7 +58,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/yourusername/physical-ai-textbook/tree/main/',
+          editUrl: 'https://github.com/eDeveloper132/textbook-hackathon/tree/main/',
           routeBasePath: '/',
         },
         blog: false,
@@ -85,7 +85,7 @@ const config: Config = {
           label: 'Course',
         },
         {
-          href: 'https://github.com/yourusername/physical-ai-textbook',
+          href: 'https://github.com/eDeveloper132/textbook-hackathon',
           label: 'GitHub',
           position: 'right',
         },
