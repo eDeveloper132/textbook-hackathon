@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FEATURES, getBackendUrl } from '../utils/featureFlags';
 
 interface QuizQuestion {
@@ -10,10 +10,22 @@ interface QuizQuestion {
 
 export default function FeatureToolbar() {
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showPersonalize, setShowPersonalize] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizResult, setQuizResult] = useState<{ score: number; level: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [personalizedContent, setPersonalizedContent] = useState<string | null>(null);
+  const [userLevel, setUserLevel] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check login status and user level on mount
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const level = localStorage.getItem('userLevel');
+    setIsLoggedIn(!!token);
+    setUserLevel(level);
+  }, []);
 
   // Default quiz questions
   const defaultQuestions: QuizQuestion[] = [
@@ -66,6 +78,7 @@ export default function FeatureToolbar() {
     const level = percentage >= 80 ? 'advanced' : percentage >= 50 ? 'intermediate' : 'beginner';
     
     setQuizResult({ score, level });
+    setUserLevel(level);
     localStorage.setItem('userLevel', level);
 
     // Try to save to backend
@@ -79,6 +92,51 @@ export default function FeatureToolbar() {
         });
       }
     } catch {}
+  };
+
+  // Handle personalization
+  const handlePersonalize = async () => {
+    const level = localStorage.getItem('userLevel');
+    if (!level) {
+      setShowQuiz(true);
+      return;
+    }
+    setShowPersonalize(true);
+    setLoading(true);
+    
+    try {
+      // Get current page slug from URL
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const chapterSlug = pathParts[pathParts.length - 1] || 'introduction';
+      
+      const res = await fetch(`${getBackendUrl()}/api/personalize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chapter_slug: chapterSlug, user_level: level }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setPersonalizedContent(data.content || `Content personalized for ${level} level learners.`);
+      } else {
+        // Generate local personalization message
+        setPersonalizedContent(getLocalPersonalization(level, chapterSlug));
+      }
+    } catch {
+      const level = localStorage.getItem('userLevel') || 'beginner';
+      setPersonalizedContent(getLocalPersonalization(level, 'this topic'));
+    }
+    setLoading(false);
+  };
+
+  // Generate local personalization based on level
+  const getLocalPersonalization = (level: string, topic: string): string => {
+    const tips: Record<string, string> = {
+      beginner: `🎯 **Beginner Tips for ${topic}:**\n\n• Start with the basics - don't skip foundational concepts\n• Practice with simple examples first\n• Use the chatbot to ask "explain like I'm new"\n• Focus on understanding WHY before HOW\n• Take notes and revisit difficult sections`,
+      intermediate: `📈 **Intermediate Tips for ${topic}:**\n\n• Connect this topic to what you already know\n• Try modifying the code examples\n• Explore the "Why" behind design decisions\n• Challenge yourself with the exercises\n• Start building small projects using these concepts`,
+      advanced: `🚀 **Advanced Tips for ${topic}:**\n\n• Dive into edge cases and optimizations\n• Explore the source code and implementations\n• Consider contributing to open-source projects\n• Mentor others - teaching deepens understanding\n• Explore research papers in this area`,
+    };
+    return tips[level] || tips.beginner;
   };
 
   return (
@@ -101,14 +159,36 @@ export default function FeatureToolbar() {
         )}
         {FEATURES.PERSONALIZATION && (
           <button 
-            onClick={() => alert('Login and take the quiz to unlock personalized content!')} 
+            onClick={handlePersonalize}
             className="toolbar-btn personalize-btn"
             title="Personalize Content"
           >
-            ✨ Personalize
+            ✨ {userLevel ? `Level: ${userLevel.charAt(0).toUpperCase() + userLevel.slice(1)}` : 'Personalize'}
           </button>
         )}
       </div>
+
+      {/* Personalization Modal */}
+      {showPersonalize && (
+        <div className="quiz-modal-overlay" onClick={() => setShowPersonalize(false)}>
+          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
+            <h2>✨ Personalized Learning</h2>
+            {loading ? (
+              <p>⏳ Generating personalized content...</p>
+            ) : (
+              <div className="personalized-content">
+                <div className={`level-badge ${userLevel}`} style={{ marginBottom: '1rem' }}>
+                  Your Level: {userLevel?.toUpperCase()}
+                </div>
+                <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                  {personalizedContent}
+                </div>
+              </div>
+            )}
+            <button className="close-quiz" onClick={() => setShowPersonalize(false)}>×</button>
+          </div>
+        </div>
+      )}
 
       {/* Quiz Modal */}
       {showQuiz && (
