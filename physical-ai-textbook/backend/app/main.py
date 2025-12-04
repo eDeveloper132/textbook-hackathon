@@ -1,6 +1,9 @@
 """
 FastAPI backend for Physical AI Textbook RAG Chatbot
 """
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file before anything else
+
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
