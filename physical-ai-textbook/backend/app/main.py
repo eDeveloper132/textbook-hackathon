@@ -105,6 +105,11 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 
 
 # Health Check
+@app.get("/")
+async def root():
+    return {"message": "Physical AI Textbook API", "docs": "/docs", "health": "/api/health"}
+
+
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "service": "physical-ai-textbook-api"}

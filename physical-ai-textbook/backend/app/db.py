@@ -8,12 +8,12 @@ import aiosqlite
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-# Database file path - use file-based for persistence
-# For in-memory, we need a shared connection
-DB_PATH = os.getenv("DATABASE_PATH", "./data/textbook.db")
+# Database file path - use /tmp for Render free tier (ephemeral but works)
+# For persistent storage, upgrade to paid plan with disk
+DB_PATH = os.getenv("DATABASE_PATH", "/tmp/textbook.db")
 
 # For file-based DB, ensure directory exists
-if DB_PATH != ":memory:":
+if DB_PATH != ":memory:" and not DB_PATH.startswith("/tmp"):
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
 
 # Shared connection for the app
