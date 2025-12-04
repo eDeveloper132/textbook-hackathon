@@ -107,10 +107,11 @@ const config: Config = {
 
   customFields: {
     backendUrl: process.env.REACT_APP_BACKEND_URL || 'https://physical-ai-backend.onrender.com',
-    featureAuth: process.env.REACT_APP_FEATURE_AUTH === 'true',
-    featureQuiz: process.env.REACT_APP_FEATURE_QUIZ === 'true',
-    featurePersonalization: process.env.REACT_APP_FEATURE_PERSONALIZATION === 'true',
-    featureUrdu: process.env.REACT_APP_FEATURE_URDU === 'true',
+    // Hardcoded to true for hackathon demo
+    featureAuth: true,
+    featureQuiz: true,
+    featurePersonalization: true,
+    featureUrdu: true,
   },
 };
 

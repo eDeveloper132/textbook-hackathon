@@ -1,31 +1,36 @@
 // Feature flags for bonus features
-// Controlled via environment variables
+// Uses Docusaurus customFields from docusaurus.config.ts
 
-declare global {
-  interface Window {
-    __DOCUSAURUS_CUSTOM_FIELDS__?: {
-      backendUrl?: string;
-      featureAuth?: boolean;
-      featureQuiz?: boolean;
-      featurePersonalization?: boolean;
-      featureUrdu?: boolean;
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+
+// For use in React components (hooks)
+export function useFeatures() {
+  try {
+    const { siteConfig } = useDocusaurusContext();
+    const customFields = siteConfig.customFields || {};
+    return {
+      AUTH: customFields.featureAuth === true,
+      QUIZ: customFields.featureQuiz === true,
+      PERSONALIZATION: customFields.featurePersonalization === true,
+      URDU_TRANSLATION: customFields.featureUrdu === true,
+    };
+  } catch {
+    // Fallback if context not available
+    return {
+      AUTH: true,
+      QUIZ: true,
+      PERSONALIZATION: true,
+      URDU_TRANSLATION: true,
     };
   }
 }
 
+// For non-hook usage (always returns true for demo)
 export const FEATURES = {
-  AUTH: typeof window !== 'undefined' 
-    ? window.__DOCUSAURUS_CUSTOM_FIELDS__?.featureAuth === true
-    : process.env.REACT_APP_FEATURE_AUTH === 'true',
-  QUIZ: typeof window !== 'undefined'
-    ? window.__DOCUSAURUS_CUSTOM_FIELDS__?.featureQuiz === true
-    : process.env.REACT_APP_FEATURE_QUIZ === 'true',
-  PERSONALIZATION: typeof window !== 'undefined'
-    ? window.__DOCUSAURUS_CUSTOM_FIELDS__?.featurePersonalization === true
-    : process.env.REACT_APP_FEATURE_PERSONALIZATION === 'true',
-  URDU_TRANSLATION: typeof window !== 'undefined'
-    ? window.__DOCUSAURUS_CUSTOM_FIELDS__?.featureUrdu === true
-    : process.env.REACT_APP_FEATURE_URDU === 'true',
+  AUTH: true,
+  QUIZ: true,
+  PERSONALIZATION: true,
+  URDU_TRANSLATION: true,
 } as const;
 
 export function isFeatureEnabled(feature: keyof typeof FEATURES): boolean {
@@ -33,9 +38,9 @@ export function isFeatureEnabled(feature: keyof typeof FEATURES): boolean {
 }
 
 export function getBackendUrl(): string {
-  if (typeof window !== 'undefined') {
-    return window.__DOCUSAURUS_CUSTOM_FIELDS__?.backendUrl 
-      || 'https://physical-ai-backend.onrender.com';
+  // For hackathon: return localhost if running locally, otherwise production URL
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:8000';
   }
-  return process.env.REACT_APP_BACKEND_URL || 'https://physical-ai-backend.onrender.com';
+  return 'https://physical-ai-backend.onrender.com';
 }

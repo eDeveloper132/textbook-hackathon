@@ -6,73 +6,114 @@ interface ChatbotIframeProps {
   onSelectionProcessed?: () => void;
 }
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export default function ChatbotIframe({ 
   selectionText, 
   onSelectionProcessed 
 }: ChatbotIframeProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const backendUrl = getBackendUrl();
 
-  // Send selection to iframe when it changes
+  // Handle selection text
   useEffect(() => {
-    if (selectionText && iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        { type: 'selection', text: selectionText },
-        backendUrl
-      );
+    if (selectionText) {
+      setInput(`Explain this: "${selectionText}"`);
       setIsOpen(true);
       onSelectionProcessed?.();
     }
-  }, [selectionText, backendUrl, onSelectionProcessed]);
+  }, [selectionText, onSelectionProcessed]);
 
-  // Listen for messages from iframe
+  // Auto-scroll to bottom
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== backendUrl) return;
-      
-      if (event.data.type === 'resize') {
-        // Handle iframe resize requests
-      } else if (event.data.type === 'close') {
-        setIsOpen(false);
-      }
-    };
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [backendUrl]);
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: userMessage }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.answer || 'Sorry, I could not process that request.' 
+      }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, I could not connect to the server. Please try again later.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   return (
     <div className="chatbot-container">
       {isOpen ? (
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setIsOpen(false)}
-            style={{
-              position: 'absolute',
-              top: -12,
-              right: -12,
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: '#ef4444',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 16,
-              zIndex: 1,
-            }}
-            aria-label="Close chatbot"
-          >
-            ×
-          </button>
-          <iframe
-            ref={iframeRef}
-            src={`${backendUrl}/chatbot`}
-            className="chatbot-iframe"
-            title="AI Chatbot"
-            allow="clipboard-read; clipboard-write"
-          />
+        <div className="chatbot-window">
+          <div className="chatbot-header">
+            <span>🤖 AI Assistant</span>
+            <button onClick={() => setIsOpen(false)} aria-label="Close chatbot">×</button>
+          </div>
+          <div className="chatbot-messages">
+            {messages.length === 0 && (
+              <div className="chatbot-welcome">
+                Hi! I'm your AI assistant for Physical AI & Robotics. Ask me anything about ROS2, simulation, or VLA models!
+              </div>
+            )}
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`chatbot-message ${msg.role}`}>
+                {msg.content}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="chatbot-message assistant">
+                <span className="typing-indicator">Thinking...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="chatbot-input-container">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask a question..."
+              disabled={isLoading}
+            />
+            <button onClick={sendMessage} disabled={isLoading || !input.trim()}>
+              Send
+            </button>
+          </div>
         </div>
       ) : (
         <button
