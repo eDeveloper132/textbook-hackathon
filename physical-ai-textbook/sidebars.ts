@@ -6,6 +6,7 @@ const sidebars: SidebarsConfig = {
     'why-physical-ai',
     'learning-outcomes',
     'assessments',
+    'about-author',
     {
       type: 'category',
       label: 'Module 1: ROS2 Foundations',
