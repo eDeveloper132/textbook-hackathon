@@ -49,6 +49,13 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
 
 async def register_user(email: str, password: str) -> Dict[str, Any]:
     """Register new user with email/password"""
+    # Validate password length (bcrypt limit is 72 bytes)
+    if len(password.encode('utf-8')) > 72:
+        raise ValueError("Password too long. Maximum 72 characters allowed.")
+    
+    if len(password) < 6:
+        raise ValueError("Password too short. Minimum 6 characters required.")
+    
     existing = await fetch_one("SELECT id FROM users WHERE email = $1", email)
     if existing:
         raise ValueError("Email already registered")
