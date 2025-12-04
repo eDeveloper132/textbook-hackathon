@@ -178,15 +178,22 @@ export default function FeatureToolbar() {
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const chapterSlug = pathParts[pathParts.length - 1] || 'introduction';
       
+      // Get page content for personalization
+      const pageContent = document.querySelector('article')?.textContent?.slice(0, 2000) || '';
+      
+      const token = localStorage.getItem('authToken');
       const res = await fetch(`${getBackendUrl()}/api/personalize`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chapter_slug: chapterSlug, user_level: level }),
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ chapter_slug: chapterSlug, content: pageContent }),
       });
       
       if (res.ok) {
         const data = await res.json();
-        setPersonalizedContent(data.content || `Content personalized for ${level} level learners.`);
+        setPersonalizedContent(data.content || data.personalized_content || `Content personalized for ${level} level learners.`);
       } else {
         // Generate local personalization message
         setPersonalizedContent(getLocalPersonalization(level, chapterSlug));
