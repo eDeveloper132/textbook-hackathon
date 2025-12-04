@@ -1,0 +1,8 @@
+{
+  "label": "Module 1: ROS2 Foundations",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn the fundamentals of ROS2 - the robotics middleware powering modern robots."
+  }
+}

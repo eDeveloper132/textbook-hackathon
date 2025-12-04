@@ -1,0 +1,115 @@
+---
+sidebar_position: 4
+title: "Week 3: Launch Files & Parameters"
+description: Configuring and launching ROS2 systems
+---
+
+# Week 3: Launch Files & Parameters
+
+Learn to configure complex robot systems with launch files and parameters.
+
+## Launch Files
+
+Launch files start multiple nodes with specific configurations.
+
+### Python Launch File
+
+```python
+# launch/robot_launch.py
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='my_robot',
+            executable='controller',
+            name='robot_controller',
+            parameters=[{
+                'max_speed': 1.5,
+                'use_sim_time': True
+            }],
+            remappings=[
+                ('cmd_vel', '/robot/cmd_vel'),
+            ]
+        ),
+        Node(
+            package='my_robot',
+            executable='sensor_processor',
+            name='sensor_node',
+            output='screen'
+        ),
+    ])
+```
+
+### Launch with Arguments
+
+```python
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument(
+            'robot_name',
+            default_value='robot1',
+            description='Name of the robot'
+        ),
+        Node(
+            package='my_robot',
+            executable='controller',
+            name=LaunchConfiguration('robot_name'),
+        ),
+    ])
+```
+
+### Running Launch Files
+
+```bash
+# Run launch file
+ros2 launch my_robot robot_launch.py
+
+# With arguments
+ros2 launch my_robot robot_launch.py robot_name:=my_robot
+```
+
+## Parameters
+
+Parameters are node-specific configuration values.
+
+### Declaring Parameters
+
+```python
+class MyNode(Node):
+    def __init__(self):
+        super().__init__('my_node')
+        
+        # Declare with default
+        self.declare_parameter('max_speed', 1.0)
+        self.declare_parameter('robot_name', 'default_robot')
+        
+        # Get parameter values
+        self.max_speed = self.get_parameter('max_speed').value
+        self.robot_name = self.get_parameter('robot_name').value
+```
+
+### YAML Parameter Files
+
+```yaml
+# config/robot_params.yaml
+robot_controller:
+  ros__parameters:
+    max_speed: 2.0
+    min_speed: 0.1
+    pid_gains:
+      kp: 1.0
+      ki: 0.1
+      kd: 0.01
+```
+
+## Key Takeaways
+
+1. **Launch files** orchestrate multi-node systems
+2. **Parameters** configure nodes at runtime
+3. **YAML files** externalize configuration
+4. **Composable nodes** improve performance

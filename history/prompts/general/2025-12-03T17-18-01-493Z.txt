@@ -1,0 +1,1 @@
+User requested to add the .specify folder to context, confirmed its contents, and stated intent to use /sp.command-name. Conversation closed at 2025-12-03T17:18:01.493Z.

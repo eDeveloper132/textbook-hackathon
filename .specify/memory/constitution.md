@@ -1,55 +1,73 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# RoboSim Portfolio Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Free Tools Only
+All tools and services must be free-tier or open-source:
+- **Documentation**: Docusaurus (static site generator)
+- **Hosting**: GitHub Pages (free hosting)
+- **Database**: Neon PostgreSQL (free tier) or Qdrant (free tier for vector search)
+- **CI/CD**: GitHub Actions (free for public repos)
+- No paid services, subscriptions, or premium tiers allowed
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Minimal Codebase (<500 LOC)
+Total lines of code must stay under 500 LOC:
+- Prioritize simplicity over features
+- Use existing libraries/frameworks instead of custom code
+- Each module should be <100 LOC
+- Measure with `cloc` or equivalent; exclude config files
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. ROS2/Gazebo/Isaac Focus
+All simulation projects must target robotics simulation:
+- **ROS2**: Primary robotics middleware
+- **Gazebo**: Physics simulation environment
+- **Isaac Sim**: NVIDIA's robotics simulation platform
+- Portfolio showcases robotic simulation expertise
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Test-Driven Development (NON-NEGOTIABLE)
+TDD mandatory for all modules:
+- Write tests FIRST, then implement
+- Red → Green → Refactor cycle enforced
+- Minimum 80% code coverage
+- No merge without passing tests
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Modular Architecture (Bonus-Ready)
+Design for extensibility and bonus features:
+- Each feature is a standalone module
+- Clear interfaces between modules
+- Easy to add/remove features
+- Plugin-style architecture where possible
 
-### [PRINCIPLE_6_NAME]
+### VI. Simplicity First
+YAGNI (You Aren't Gonna Need It) principles:
+- Start with MVP, add features incrementally
+- No over-engineering or premature optimization
+- Documentation over complex code
+- If in doubt, leave it out
 
+## Technology Stack
 
-[PRINCIPLE__DESCRIPTION]
+| Layer | Technology | Constraint |
+|-------|------------|------------|
+| Frontend | Docusaurus | Static only |
+| Hosting | GitHub Pages | Free tier |
+| Database | Neon/Qdrant | Free tier |
+| CI/CD | GitHub Actions | Public repo |
+| Simulations | ROS2, Gazebo, Isaac | Open-source |
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Development Workflow
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+1. **Feature Request** → Create spec document
+2. **TDD** → Write failing tests first
+3. **Implement** → Minimal code to pass tests
+4. **Review** → LOC check (<500 total)
+5. **Deploy** → GitHub Pages auto-deploy
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- Constitution supersedes all other decisions
+- Any tool/service addition must be verified as free-tier
+- LOC budget violations block deployment
+- Amendments require documented justification
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-04

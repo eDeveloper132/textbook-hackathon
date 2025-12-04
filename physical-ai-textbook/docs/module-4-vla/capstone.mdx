@@ -1,0 +1,86 @@
+---
+sidebar_position: 4
+title: "Capstone Project"
+description: End-to-end Physical AI system
+---
+
+# Capstone Project
+
+Build a complete Physical AI system integrating everything you've learned.
+
+## Project Overview
+
+```mermaid
+graph TB
+    subgraph "Your Capstone"
+        P[Perception] --> R[Reasoning]
+        R --> A[Action]
+        A --> P
+    end
+    
+    subgraph "Technologies"
+        ROS[ROS2]
+        SIM[Isaac Sim]
+        VLA[VLA Model]
+    end
+    
+    ROS --> P
+    SIM --> P
+    VLA --> R
+```
+
+## Project Options
+
+### Option 1: Mobile Manipulator
+
+Build a robot that can:
+- Navigate to objects using Nav2
+- Detect objects with vision
+- Pick and place with VLA control
+
+### Option 2: Humanoid Control
+
+Build a system for:
+- Bipedal walking simulation
+- Gesture recognition
+- Language-guided motion
+
+### Option 3: Sim-to-Real Transfer
+
+Demonstrate:
+- Training in Isaac Sim
+- Domain randomization
+- Real robot deployment
+
+## Requirements
+
+| Requirement | Points |
+|-------------|--------|
+| Working demonstration | 40 |
+| Code quality & documentation | 20 |
+| Technical presentation | 15 |
+| Novel contribution | 25 |
+
+## Timeline
+
+```mermaid
+gantt
+    title Capstone Timeline
+    dateFormat  YYYY-MM-DD
+    section Planning
+    Proposal           :2024-01-01, 7d
+    section Development
+    Core Implementation :2024-01-08, 21d
+    section Polish
+    Testing & Docs     :2024-01-29, 7d
+    Presentation      :2024-02-05, 2d
+```
+
+## Submission
+
+1. GitHub repository with README
+2. 5-minute demo video
+3. Technical report (5-10 pages)
+4. Live presentation
+
+**Good luck with your capstone!** 🎓🤖
