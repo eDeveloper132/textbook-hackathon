@@ -180,7 +180,98 @@
 .urdu-content {
   direction: rtl;
   text-align: right;
-  font-family: 'Noto Nastaliq Urdu', serif;
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Nafees Nastaleeq', Arial, sans-serif;
+}
+
+/* Urdu Translation Modal Styles */
+.urdu-translation-result {
+  max-width: 100%;
+}
+
+.urdu-translation-result .urdu-text {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Nafees Nastaleeq', Arial, sans-serif;
+  font-size: 1.4rem;
+  line-height: 2.2;
+  letter-spacing: 0.02em;
+  color: #1a5f2a;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 12px;
+  border-left: 4px solid #4caf50;
+}
+
+.urdu-instructions {
+  text-align: center;
+  padding: 1rem;
+}
+
+.urdu-instructions ol {
+  text-align: left;
+  margin: 1rem auto;
+  max-width: 300px;
+}
+
+.urdu-instructions ol li {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+/* English text in translation */
+.english-text-box {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid var(--ifm-color-primary);
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Urdu text box */
+.urdu-text-box {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 12px;
+  border-right: 4px solid #4caf50;
+  direction: rtl;
+  text-align: right;
+}
+
+.urdu-text-box .urdu-label {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.urdu-text-box .urdu-translation-text {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', Arial, sans-serif;
+  font-size: 1.5rem;
+  line-height: 2.4;
+  color: #1b5e20;
+  white-space: pre-wrap;
+}
+
+/* Dark mode support for Urdu */
+[data-theme='dark'] .urdu-text-box {
+  background: linear-gradient(135deg, #1b3d1f 0%, #2e5431 100%);
+}
+
+[data-theme='dark'] .urdu-text-box .urdu-translation-text {
+  color: #a5d6a7;
+}
+
+[data-theme='dark'] .urdu-text-box .urdu-label {
+  color: #81c784;
+}
+
+[data-theme='dark'] .english-text-box {
+  background: #2d2d2d;
+  border-left-color: var(--ifm-color-primary-light);
 }
 
 /* Mobile responsiveness */
@@ -188,5 +279,10 @@
   .chatbot-window {
     width: calc(100vw - 2rem);
     height: 60vh;
+  }
+  
+  .urdu-text-box .urdu-translation-text {
+    font-size: 1.3rem;
+    line-height: 2.2;
   }
 }

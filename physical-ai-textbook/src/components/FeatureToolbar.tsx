@@ -282,13 +282,13 @@ export default function FeatureToolbar() {
               <p>⏳ ترجمہ ہو رہا ہے... (Translating...)</p>
             ) : (
               <div className="urdu-translation-result">
-                <div style={{ marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
-                  <strong>English:</strong>
+                <div className="english-text-box">
+                  <strong>📖 English:</strong>
                   <p style={{ marginTop: '0.5rem' }}>{selectedText}</p>
                 </div>
-                <div style={{ padding: '1rem', background: '#e8f5e9', borderRadius: '8px', direction: 'rtl' }}>
-                  <strong>:اردو</strong>
-                  <p style={{ marginTop: '0.5rem', fontSize: '1.2rem', whiteSpace: 'pre-wrap' }}>
+                <div className="urdu-text-box">
+                  <span className="urdu-label">🇵🇰 اردو ترجمہ:</span>
+                  <p className="urdu-translation-text">
                     {urduTranslation}
                   </p>
                 </div>
