@@ -8,11 +8,13 @@ import aiosqlite
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-# Database file path - defaults to ./data/textbook.db
-DB_PATH = os.getenv("DATABASE_PATH", str(Path(__file__).parent.parent / "data" / "textbook.db"))
+# Database file path - use :memory: for free hosting (no persistence)
+# Set DATABASE_PATH env var for persistent storage
+DB_PATH = os.getenv("DATABASE_PATH", ":memory:")
 
-# Ensure data directory exists
-Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+# For file-based DB, ensure directory exists
+if DB_PATH != ":memory:":
+    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
 
 
 async def get_connection() -> aiosqlite.Connection:

@@ -5,6 +5,7 @@ services:
     rootDir: physical-ai-textbook/backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -21,7 +22,3 @@ services:
       - key: FRONTEND_URL
         sync: false
     healthCheckPath: /api/health
-    disk:
-      name: data
-      mountPath: /app/data
-      sizeGB: 1
