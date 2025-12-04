@@ -42,5 +42,5 @@ export function getBackendUrl(): string {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'http://localhost:8000';
   }
-  return 'https://physical-ai-backend.onrender.com';
+  return 'https://physical-ai-textbook-api.onrender.com';
 }

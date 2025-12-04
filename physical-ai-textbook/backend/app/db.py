@@ -3,18 +3,37 @@ Database connection and helpers for SQLite (aiosqlite)
 Migrated from PostgreSQL/Neon due to auth issues.
 """
 import os
+import sys
 import json
 import aiosqlite
+import tempfile
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-# Database file path - use /tmp for Render free tier (ephemeral but works)
-# For persistent storage, upgrade to paid plan with disk
-DB_PATH = os.getenv("DATABASE_PATH", "/tmp/textbook.db")
+# Database file path - cross-platform support
+# On Windows: uses temp directory
+# On Linux/Render: uses /tmp
+def get_db_path():
+    env_path = os.getenv("DATABASE_PATH")
+    if env_path:
+        return env_path
+    
+    # Use temp directory for cross-platform compatibility
+    if sys.platform == "win32":
+        # Windows: use local data folder
+        data_dir = Path(__file__).parent.parent / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        return str(data_dir / "textbook.db")
+    else:
+        # Linux/Render: use /tmp
+        return "/tmp/textbook.db"
 
-# For file-based DB, ensure directory exists
-if DB_PATH != ":memory:" and not DB_PATH.startswith("/tmp"):
-    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+DB_PATH = get_db_path()
+
+# Ensure directory exists for the database file
+db_dir = Path(DB_PATH).parent
+if db_dir and not db_dir.exists():
+    db_dir.mkdir(parents=True, exist_ok=True)
 
 # Shared connection for the app
 _db_connection: Optional[aiosqlite.Connection] = None
