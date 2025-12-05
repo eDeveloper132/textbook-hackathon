@@ -42,18 +42,27 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const [submitting, setSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
     const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
     
     try {
+      // Longer timeout for Render cold starts (up to 60 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const response = await fetch(`${getBackendUrl()}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
       
+      clearTimeout(timeoutId);
       const data = await response.json();
       
       if (response.ok && data.token) {
@@ -65,8 +74,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       } else {
         setError(data.detail || 'Authentication failed');
       }
-    } catch {
-      setError('Connection error. Please try again.');
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Server is waking up. Please try again in a few seconds.');
+      } else {
+        setError('Connection error. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -124,7 +139,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                 minLength={6}
               />
               {error && <p className="auth-error">{error}</p>}
-              <button type="submit">{isRegister ? 'Register' : 'Login'}</button>
+              <button type="submit" disabled={submitting}>
+                {submitting ? 'Connecting...' : (isRegister ? 'Register' : 'Login')}
+              </button>
             </form>
             <p className="auth-toggle">
               {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
@@ -220,6 +237,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           border-radius: 6px;
           cursor: pointer;
           font-size: 1rem;
+        }
+        .auth-modal button[type="submit"]:disabled {
+          opacity: 0.7;
+          cursor: wait;
         }
         .auth-error {
           color: #dc2626;
