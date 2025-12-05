@@ -106,7 +106,7 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
 
   customFields: {
-    backendUrl: process.env.REACT_APP_BACKEND_URL || 'https://physical-ai-backend.onrender.com',
+    backendUrl: process.env.REACT_APP_BACKEND_URL || 'https://physical-ai-textbook-api.onrender.com',
     // Hardcoded to true for hackathon demo
     featureAuth: true,
     featureQuiz: true,

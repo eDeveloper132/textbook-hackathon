@@ -38,9 +38,10 @@ export function isFeatureEnabled(feature: keyof typeof FEATURES): boolean {
 }
 
 export function getBackendUrl(): string {
-  // For hackathon: return localhost if running locally, otherwise production URL
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://localhost:8000';
-  }
+  // Always use deployed backend for now
+  // To test locally, uncomment the localhost check below:
+  // if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  //   return 'http://localhost:8000';
+  // }
   return 'https://physical-ai-textbook-api.onrender.com';
 }
