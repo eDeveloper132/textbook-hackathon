@@ -4,8 +4,10 @@ An interactive educational platform for learning Physical AI and Humanoid Roboti
 
 ## 🚀 Live Demo
 
-- **Frontend**: [GitHub Pages](https://yourusername.github.io/physical-ai-textbook)
-- **API**: [Render.com](https://physical-ai-backend.onrender.com)
+- **Frontend**: [GitHub Pages](https://edeveloper132.github.io/textbook-hackathon/)
+- **API**: [Render.com](https://physical-ai-textbook-api.onrender.com)
+
+> **Note**: The backend is hosted on Render's free tier, which spins down after 15 minutes of inactivity. The first request may take 30-60 seconds while the server wakes up.
 
 ## 📚 Course Modules
 
@@ -38,7 +40,7 @@ An interactive educational platform for learning Physical AI and Humanoid Roboti
 | Backend | FastAPI, Python 3.11 |
 | AI | OpenAI GPT-4o-mini |
 | Vector DB | Qdrant Cloud |
-| Database | PostgreSQL (Neon) |
+| Database | SQLite (local) / PostgreSQL (production) |
 | Hosting | GitHub Pages + Render.com |
 
 ## 🏃 Quick Start
@@ -51,6 +53,8 @@ npm install
 npm start
 ```
 
+Visit `http://localhost:3000/textbook-hackathon/` in your browser.
+
 ### Backend
 
 ```bash
@@ -60,6 +64,8 @@ cp .env.example .env
 # Edit .env with your API keys
 uvicorn app.main:app --reload
 ```
+
+API available at `http://localhost:8000` (docs at `/docs`).
 
 ### Index Content (for RAG)
 
@@ -72,7 +78,7 @@ python scripts/index_content.py
 
 ### Frontend (.env)
 ```env
-REACT_APP_BACKEND_URL=http://localhost:8000
+REACT_APP_BACKEND_URL=https://physical-ai-textbook-api.onrender.com
 REACT_APP_FEATURE_AUTH=true
 REACT_APP_FEATURE_QUIZ=true
 REACT_APP_FEATURE_PERSONALIZATION=true
@@ -82,13 +88,15 @@ REACT_APP_FEATURE_URDU=true
 ### Backend (.env)
 ```env
 OPENAI_API_KEY=sk-...
-DATABASE_URL=postgresql://...
-QDRANT_URL=https://...
-QDRANT_API_KEY=...
-JWT_SECRET=...
-GITHUB_CLIENT_ID=...
-GITHUB_CLIENT_SECRET=...
+QDRANT_URL=https://your-cluster.qdrant.io:6333
+QDRANT_API_KEY=your-api-key
+JWT_SECRET=your-secret-key
+GITHUB_CLIENT_ID=your-github-client-id      # Optional
+GITHUB_CLIENT_SECRET=your-github-secret     # Optional
+FRONTEND_URL=http://localhost:3000          # For OAuth callback
 ```
+
+> ⚠️ **Never commit your `.env` file!** It should be in `.gitignore`.
 
 ## 📁 Project Structure
 
